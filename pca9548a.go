@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"golang.org/x/exp/io/i2c"
+	"golang.org/x/exp/io/i2c/driver"
 )
 
 const (
@@ -15,6 +16,7 @@ const (
 type PCA9548A struct {
 	address uint8
 	dev     *i2c.Device
+	opener  driver.Opener
 	// Mutex protects port from changing during a read / write
 	sync.Mutex
 	port uint8
@@ -25,7 +27,7 @@ func NewMux(i2cbus string, opts ...func(*PCA9548A) error) (*PCA9548A, error) {
 	pca := new(PCA9548A)
 	pca.address = defaultAddress
 	pca.port = 127
-
+	pca.opener = &i2c.Devfs{Dev: i2cbus}
 	for _, option := range opts {
 		option(pca)
 	}
@@ -74,4 +76,8 @@ func (p *PCA9548A) SetPort(port uint8) error {
 	p.port = port
 	p.Unlock()
 	return nil
+}
+
+func (p *PCA9548A) GetOpener() driver.Opener {
+	return p.opener
 }
