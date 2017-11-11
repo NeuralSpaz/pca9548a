@@ -67,7 +67,7 @@ func (p *PCA9548A) SetPort(port uint8) error {
 		p.Unlock()
 		return fmt.Errorf("error setting port to %d : port must be be 0-7", port)
 	}
-	if err := p.dev.Write([]byte{byte(port)}); err != nil {
+	if err := p.dev.Write([]byte{byte(1 << port)}); err != nil {
 		p.Unlock()
 		return err
 	}
